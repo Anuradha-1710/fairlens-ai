@@ -26,10 +26,21 @@ initGemini();
 // Middleware
 app.use(helmet());
 app.use(morgan('combined'));
+const allowedOrigins = [
+  process.env.CLIENT_URL || 'https://fairlens-ai-6lrm.vercel.app',
+  'http://localhost:5173',
+];
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS policy does not allow access from this origin'), false);
+    }
+  },
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));

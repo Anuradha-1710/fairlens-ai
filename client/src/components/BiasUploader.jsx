@@ -63,7 +63,7 @@ export default function BiasUploader({ domain, onDomainChange, onAnalyze, loadin
 
   const handleSampleDataset = async (sampleType) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/v1/samples/${sampleType}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://fairlens-ai-vfue.onrender.com/api/v1'}/samples/${sampleType}`);
       const { data, description } = await response.json();
       onAnalyze(data, `${sampleType.charAt(0).toUpperCase() + sampleType.slice(1)} Sample`);
       toast.success(`Sample ${sampleType} dataset loaded!`);

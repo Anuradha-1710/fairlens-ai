@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
+const API_URL = import.meta.env.VITE_API_URL || "https://fairlens-ai-vfue.onrender.com/api/v1";
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -21,14 +22,11 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1"}/auth/login`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      }
-    );
+    const res = await fetch(`${API_URL}/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
     const data = await res.json();
     if (!res.ok) throw { response: { data } };
     localStorage.setItem("token", data.token);
@@ -38,14 +36,11 @@ export function AuthProvider({ children }) {
   };
 
   const register = async (formData) => {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL || "http://localhost:5000/api/v1"}/auth/register`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      }
-    );
+    const res = await fetch(`${API_URL}/auth/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
     const data = await res.json();
     if (!res.ok) throw { response: { data } };
     localStorage.setItem("token", data.token);
