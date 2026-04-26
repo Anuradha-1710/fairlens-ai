@@ -1,0 +1,135 @@
+/* Dashboard.css */
+
+.dashboard-page {
+  background-color: var(--light);
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-container h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, var(--primary) 0%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.filter-section {
+  margin: 30px 0;
+}
+
+.filter-section select {
+  max-width: 200px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #4A5568;
+}
+
+.analyses-table {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: auto;
+  margin-top: 30px;
+  box-shadow: 0 4px 6px var(--shadow);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background: var(--light);
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 2px solid var(--border);
+  color: var(--text);
+}
+
+td {
+  padding: 15px;
+  border-bottom: 1px solid var(--border);
+}
+
+tr:hover {
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.domain-cell {
+  text-transform: capitalize;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.score {
+  background: rgba(37, 99, 235, 0.1);
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.severity {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.severity-low {
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--success);
+}
+
+.severity-medium {
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--warning);
+}
+
+.severity-high {
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff6b6b;
+}
+
+.severity-critical {
+  background: rgba(239, 68, 68, 0.2);
+  color: var(--danger);
+}
+
+.view-button, .delete-button {
+  padding: 6px 12px;
+  margin-right: 10px;
+  font-size: 12px;
+  border-radius: 6px;
+  background: var(--primary);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.delete-button {
+  background: var(--danger);
+}
+
+.view-button:hover {
+  background: var(--primary);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.delete-button:hover {
+  background: var(--danger);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}

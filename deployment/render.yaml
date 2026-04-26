@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: fairlens-ai-backend
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: MONGODB_URI
+        fromDatabase:
+          name: fairlens_db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: CLIENT_URL
+        value: https://fairlens-ai.vercel.app
+      - key: NODE_ENV
+        value: production
+
+databases:
+  - name: fairlens_db
+    databaseName: fairlens
+    plan: starter
+    ipAllowList:
+      - service: fairlens-ai-backend

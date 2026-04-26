@@ -1,0 +1,98 @@
+/* Navbar.css */
+
+.navbar {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  padding: 15px 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 4px var(--shadow);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.logo-icon {
+  font-size: 28px;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.nav-links a {
+  color: var(--text);
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: var(--primary);
+}
+
+.nav-links .login-link {
+  color: var(--primary);
+}
+
+.nav-links .register-link {
+  background: linear-gradient(135deg, var(--primary) 0%, #818cf8 100%);
+  color: white;
+  padding: 8px 20px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.nav-links .register-link:hover {
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  transform: translateY(-1px);
+}
+
+.user-info {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.logout-button {
+  background-color: var(--danger);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+}
+
+.logout-button:hover {
+  background-color: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .nav-links {
+    gap: 15px;
+    font-size: 14px;
+  }
+
+  .nav-container {
+    padding: 0 10px;
+  }
+}

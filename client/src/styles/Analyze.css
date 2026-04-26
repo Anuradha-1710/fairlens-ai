@@ -1,0 +1,51 @@
+/* Analyze.css */
+
+.analyze-page {
+  background-color: var(--light);
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.analyze-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.analyze-container h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+  background: linear-gradient(135deg, var(--primary) 0%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  color: #4A5568;
+  margin-bottom: 30px;
+  font-size: 16px;
+}
+
+.results-section {
+  margin-top: 40px;
+}
+
+.results-section h2 {
+  font-size: 28px;
+  margin-bottom: 30px;
+  color: var(--text);
+}
+
+.report-button {
+  background: linear-gradient(135deg, var(--success) 0%, #34d399 100%);
+  color: white;
+  padding: 14px 30px;
+  font-weight: 600;
+  margin-top: 30px;
+  border-radius: 8px;
+}
+
+.report-button:hover {
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+  transform: translateY(-2px);
+}
