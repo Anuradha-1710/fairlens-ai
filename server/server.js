@@ -23,25 +23,24 @@ connectDB();
 // Initialize Gemini
 initGemini();
 
-// Middleware
-app.use(helmet());
-app.use(morgan('combined'));
-const allowedOrigins = [
-  process.env.CLIENT_URL || 'https://fairlens-ai-6lrm.vercel.app',
-  'http://localhost:5173',
-];
-
+// ✅ CORS — All Vercel URLs allowed
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('CORS policy does not allow access from this origin'), false);
-    }
+  origin: function(origin, callback) {
+    // Allow all origins in production for hackathon
+    callback(null, true);
   },
   credentials: true,
-  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
+
+// Handle preflight
+app.options('*', cors());
+
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
+app.use(morgan('combined'));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -51,7 +50,7 @@ app.use('/api/v1/analysis', analysisRoutes);
 app.use('/api/v1/gemini', geminiRoutes);
 app.use('/api/v1/reports', reportRoutes);
 
-// Health check endpoint
+// Health check
 app.get('/api/v1/health', (req, res) => {
   res.json({ status: 'ok', message: 'FairLens AI backend is running' });
 });
@@ -106,7 +105,7 @@ app.get('/api/v1/samples/loan', (req, res) => {
     { applicant_id: 19, age: 55, gender: 'M', zip_code: '10001', income: 130000, credit_score: 880, approved: 'Yes' },
     { applicant_id: 20, age: 55, gender: 'F', zip_code: '10011', income: 130000, credit_score: 880, approved: 'No' }
   ];
-  res.json({ data, description: 'Biased loan dataset - Certain zip codes denied more loans (proxy for race)' });
+  res.json({ data, description: 'Biased loan dataset - Certain zip codes denied more loans' });
 });
 
 app.get('/api/v1/samples/medical', (req, res) => {
@@ -132,7 +131,7 @@ app.get('/api/v1/samples/medical', (req, res) => {
     { patient_id: 19, age: 38, gender: 'M', insurance: 'Premium', condition: 'Depression', treatment: 'Therapy+Meds', outcome: 'Good' },
     { patient_id: 20, age: 38, gender: 'F', insurance: 'Basic', condition: 'Depression', treatment: 'Basic meds', outcome: 'Poor' }
   ];
-  res.json({ data, description: 'Biased medical treatment dataset - Low-income patients receive less aggressive treatment' });
+  res.json({ data, description: 'Biased medical treatment dataset' });
 });
 
 // 404 handler
@@ -140,7 +139,7 @@ app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// Error handler middleware (must be last)
+// Error handler
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
