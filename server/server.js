@@ -1,3 +1,4 @@
+// FairLens AI v4 - CORS Fix
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
