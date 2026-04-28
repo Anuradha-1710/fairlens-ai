@@ -86,3 +86,87 @@ a:hover {
   margin: 0 auto;
   padding: 20px;
 }
+.impact-stats-section {
+  padding: 60px 24px;
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+  text-align: center;
+}
+
+.impact-stats-section h2 {
+  font-size: 32px;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 40px;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.impact-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.impact-stat-card {
+  background: #1E293B;
+  border: 1px solid rgba(99,102,241,0.3);
+  border-radius: 16px;
+  padding: 32px 20px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.impact-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+}
+
+.impact-stat-card:hover {
+  transform: translateY(-6px);
+  border-color: rgba(99,102,241,0.6);
+  box-shadow: 0 20px 40px rgba(99,102,241,0.2);
+}
+
+.impact-stat-number {
+  font-size: 42px;
+  font-weight: 900;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 12px;
+  line-height: 1;
+}
+
+.impact-stat-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+.impact-stat-card p {
+  color: #94a3b8;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.impact-stat-card p strong {
+  color: #10b981;
+  font-size: 15px;
+}
+
+@media (max-width: 768px) {
+  .impact-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .impact-stat-number {
+    font-size: 32px;
+  }
+}
