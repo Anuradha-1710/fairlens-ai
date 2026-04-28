@@ -7,6 +7,8 @@ const detectSensitiveFields = (columns) => {
     /national|citizenship/i,
     /disability|handicap/i,
     /sexual|orientation/i,
+    /region|location|zip|state|city/i,
+    /insurance|economic|income|salary/i,
   ];
 
   const detected = [];
@@ -21,14 +23,34 @@ const detectSensitiveFields = (columns) => {
   return detected;
 };
 
-// ✅ FIXED — outcome detection sahi hai ab
+const detectBiasTypes = (columns) => {
+  const biasTypes = {
+    gender: /gender|sex|male|female/i,
+    age: /age|birthday|birth_date/i,
+    race: /race|ethnicity|color|origin/i,
+    region: /region|location|zip|state|city/i,
+    economic: /insurance|economic|income|salary/i,
+  };
+
+  const detected = {};
+  columns.forEach(col => {
+    Object.entries(biasTypes).forEach(([type, pattern]) => {
+      if (pattern.test(col)) {
+        detected[type] = col;
+      }
+    });
+  });
+
+  return detected;
+};
+
 const calculateBiasMetrics = (data, sensitiveFields) => {
   const metrics = {};
 
   // Find outcome column automatically
   const outcomeKeywords = ['hired', 'approved', 'loan_approved', 'outcome', 'accepted', 'selected', 'result', 'decision', 'treatment_recommended'];
   const columns = Object.keys(data[0] || {});
-  
+
   let outcomeColumn = null;
   columns.forEach(col => {
     if (outcomeKeywords.some(kw => col.toLowerCase().includes(kw))) {
@@ -43,7 +65,7 @@ const calculateBiasMetrics = (data, sensitiveFields) => {
 
     data.forEach(row => {
       const value = String(row[field] || 'unknown').toLowerCase().trim();
-      
+
       if (!groups[value]) {
         groups[value] = { count: 0, positive_outcomes: 0 };
       }
@@ -58,27 +80,57 @@ const calculateBiasMetrics = (data, sensitiveFields) => {
       }
     });
 
-    // Calculate approval rates per group
+    // Calculate rates per group
     const rates = {};
-    let maxRate = 0;
-    let minRate = 100;
-
     Object.entries(groups).forEach(([group, stats]) => {
-      const rate = stats.count > 0
-        ? Math.round((stats.positive_outcomes / stats.count) * 100)
-        : 0;
-      rates[group] = rate;
-      maxRate = Math.max(maxRate, rate);
-      minRate = Math.min(minRate, rate);
+      rates[group] = stats.count > 0 ? (stats.positive_outcomes / stats.count) * 100 : 0;
     });
 
-    const disparityRatio = maxRate > 0 ? minRate / maxRate : 1;
-    const biasScore = Math.round(Math.max(0, Math.min(100, (1 - disparityRatio) * 100)));
+    // Find dominant and minority groups
+    const sortedGroups = Object.entries(rates).sort((a, b) => b[1] - a[1]);
+    const dominantGroup = sortedGroups[0];
+    const minorityGroup = sortedGroups[sortedGroups.length - 1];
+
+    // Bias Score = |% dominant group outcomes - % minority group outcomes|
+    const biasScore = Math.abs(dominantGroup[1] - minorityGroup[1]);
+
+    // Demographic Parity Difference
+    const demographicParityDifference = Math.abs(dominantGroup[1] - minorityGroup[1]);
+
+    // Disparate Impact Ratio = minority_rate / majority_rate
+    const disparateImpactRatio = dominantGroup[1] > 0 ? minorityGroup[1] / dominantGroup[1] : 0;
+
+    // Statistical Significance (simple sample size check)
+    const totalSamples = Object.values(groups).reduce((sum, g) => sum + g.count, 0);
+    const statisticalSignificance = totalSamples >= 30 ? 'High' : totalSamples >= 10 ? 'Medium' : 'Low';
+
+    // Determine bias type
+    const biasTypeMap = {
+      gender: 'Gender Bias',
+      age: 'Age Bias',
+      race: 'Race/Ethnicity Bias',
+      region: 'Region/Location Bias',
+      economic: 'Insurance/Economic Bias'
+    };
+
+    const biasType = Object.keys(detectBiasTypes([field]))[0] || 'Unknown';
+    const biasTypeName = biasTypeMap[biasType] || 'General Bias';
 
     metrics[field] = {
-      biasScore,
-      disparityRatio: Math.round(disparityRatio * 100) / 100,
-      groups: rates,
+      biasType: biasTypeName,
+      biasScore: Math.round(biasScore),
+      demographicParityDifference: Math.round(demographicParityDifference),
+      disparateImpactRatio: Math.round(disparateImpactRatio * 100) / 100,
+      statisticalSignificance,
+      dominantGroup: {
+        name: dominantGroup[0],
+        rate: Math.round(dominantGroup[1])
+      },
+      minorityGroup: {
+        name: minorityGroup[0],
+        rate: Math.round(minorityGroup[1])
+      },
+      groups: Object.fromEntries(Object.entries(rates).map(([g, r]) => [g, Math.round(r)])),
       outcomeColumn,
       totalRecords: data.length,
       outcomeDistribution: Object.fromEntries(
@@ -149,6 +201,7 @@ const extractDataSummary = (data, columns, limit = 10) => {
 
 module.exports = {
   detectSensitiveFields,
+  detectBiasTypes,
   calculateBiasMetrics,
   calculateOverallFairnessScore,
   determineSeverityLevel,

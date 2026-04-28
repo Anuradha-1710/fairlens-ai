@@ -14,10 +14,28 @@ export default function Home() {
     }
   };
 
+  const handleQuickDemo = () => {
+    // Auto-load hiring biased dataset and navigate to analyze
+    navigate('/analyze', {
+      state: {
+        domain: 'hiring',
+        quickDemo: true,
+        demoMessage: 'Click Analyze to see LIVE bias detection!'
+      }
+    });
+  };
+
   return (
     <div className="home">
       <Hero />
-      
+
+      <section className="differentiator-section">
+        <div className="differentiator-banner">
+          <h2>🎯 Most tools analyze bias AFTER damage is done.</h2>
+          <p className="tagline">FairLens AI catches it BEFORE deployment.</p>
+        </div>
+      </section>
+
       <section className="features-section">
         <h2>Key Features</h2>
         <div className="features-grid">
@@ -56,37 +74,45 @@ export default function Home() {
 
       <section className="domain-section">
         <h2>Choose Your Domain</h2>
-        <DomainSelector 
-          selectedDomain={selectedDomain} 
-          onSelect={setSelectedDomain} 
+        <DomainSelector
+          selectedDomain={selectedDomain}
+          onSelect={setSelectedDomain}
         />
-        <button 
-          className="cta-button"
-          onClick={handleStartAnalysis}
-          disabled={!selectedDomain}
-        >
-          Start Analyzing →
-        </button>
+        <div className="action-buttons">
+          <button
+            className="cta-button"
+            onClick={handleStartAnalysis}
+            disabled={!selectedDomain}
+          >
+            Start Analyzing →
+          </button>
+          <button
+            className="demo-button"
+            onClick={handleQuickDemo}
+          >
+            🚀 Quick Demo (See Live Bias Detection)
+          </button>
+        </div>
       </section>
 
-      <section className="stats-section">
-        <h2>The Problem We're Solving</h2>
-        <div className="stats-grid">
-          <div className="stat-card">
-            <div className="stat-number">73%</div>
-            <p>Of HR systems show gender bias in hiring</p>
+      <section className="impact-stats-section">
+        <h2>Why FairLens AI?</h2>
+        <div className="impact-stats-grid">
+          <div className="impact-stat-card">
+            <div className="impact-stat-number">73%</div>
+            <p>of hiring systems show gender bias</p>
           </div>
-          <div className="stat-card">
-            <div className="stat-number">80%</div>
-            <p>Of loan algorithms show racial bias</p>
+          <div className="impact-stat-card">
+            <div className="impact-stat-number">$300B</div>
+            <p>lost due to biased lending annually</p>
           </div>
-          <div className="stat-card">
-            <div className="stat-number">60%</div>
-            <p>Of medical AI shows socioeconomic bias</p>
+          <div className="impact-stat-card">
+            <div className="impact-stat-number">1 in 3</div>
+            <p>patients receive unequal treatment</p>
           </div>
-          <div className="stat-card">
-            <div className="stat-number">∞</div>
-            <p>Lives affected by unfair AI decisions daily</p>
+          <div className="impact-stat-card">
+            <div className="impact-stat-icon">🎯</div>
+            <p><strong>We detect bias BEFORE deployment</strong></p>
           </div>
         </div>
       </section>
