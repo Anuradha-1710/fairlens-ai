@@ -26,14 +26,12 @@ export default function Analyze() {
     setLoading(true);
     setError('');
     setAnalysis(null);
-
     try {
       const response = await api.post('/analysis/analyze', {
         domain,
         dataset,
         datasetName,
       });
-
       setAnalysis(response.data.analysis);
     } catch (err) {
       setError(err?.response?.data?.error || err?.message || 'Analysis failed.');
@@ -42,14 +40,10 @@ export default function Analyze() {
     }
   };
 
-  const handleSimulateFix = () => {
-    setSimulatedImprovement(!simulatedImprovement);
-  };
-
   const getBiasSeverityColor = (score) => {
-    if (score > 60) return '#EF4444'; // Red - Critical
-    if (score > 30) return '#F59E0B'; // Yellow - Medium
-    return '#10B981'; // Green - Low
+    if (score > 60) return '#EF4444';
+    if (score > 30) return '#F59E0B';
+    return '#10B981';
   };
 
   const getBiasSeverityBadge = (score) => {
@@ -61,7 +55,15 @@ export default function Analyze() {
   return (
     <div className="analyze-page">
       {/* Differentiation Banner */}
-      <div className="differentiation-banner">
+      <div style={{
+        background: 'linear-gradient(90deg, #4f46e5, #7c3aed)',
+        color: 'white',
+        padding: '12px 24px',
+        textAlign: 'center',
+        fontWeight: '600',
+        fontSize: '14px',
+        letterSpacing: '0.3px'
+      }}>
         🎯 Detecting bias BEFORE it causes harm — Unlike other tools that analyze after damage is done
       </div>
 
@@ -72,11 +74,6 @@ export default function Analyze() {
             Upload CSV, paste JSON, or use a sample dataset to detect bias,
             fairness gaps, and recommendation opportunities.
           </p>
-          {location.state?.quickDemo && (
-            <div className="demo-message">
-              {location.state.demoMessage}
-            </div>
-          )}
         </header>
 
         <BiasUploader
@@ -94,12 +91,12 @@ export default function Analyze() {
 
         {analysis && (
           <section className="results-section">
+            {/* Header */}
             <div className="results-header">
               <div>
                 <h2>Analysis Results</h2>
                 <p className="subtitle">
-                  Review the fairness score, bias breakdown, and recommendations
-                  generated for this dataset.
+                  Review the fairness score, bias breakdown, and recommendations.
                 </p>
               </div>
               <button
@@ -115,85 +112,128 @@ export default function Analyze() {
             <FairnessChart biasBreakdown={analysis.biasBreakdown || []} />
 
             {/* Fairness Metrics Panel */}
-            <div className="fairness-metrics-panel">
-              <h3>Fairness Metrics Panel</h3>
-              <div className="metrics-grid">
-                <div className="metric-card">
-                  <h4>Demographic Parity Score</h4>
-                  <p className="formula">|P(outcome|group A) - P(outcome|group B)|</p>
-                  <div className="metric-value">
-                    {analysis.biasBreakdown && analysis.biasBreakdown.length > 0
-                      ? `${Math.max(...Object.values(analysis.biasBreakdown[0]?.groups || {}).map(g => g.biasScore || 0))}%`
-                      : 'N/A'
-                    }
+            <div style={{
+              marginTop: '24px',
+              background: '#1E293B',
+              borderRadius: '16px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              padding: '24px'
+            }}>
+              <h3 style={{ color: 'white', fontSize: '18px', fontWeight: '700', marginBottom: '16px' }}>
+                📊 Fairness Metrics Panel
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
+                
+                <div style={{ background: '#0F172A', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <h4 style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '8px' }}>Demographic Parity Score</h4>
+                  <p style={{ color: '#6366f1', fontSize: '11px', marginBottom: '8px' }}>|P(outcome|group A) - P(outcome|group B)|</p>
+                  <div style={{ color: 'white', fontSize: '24px', fontWeight: 'bold' }}>
+                    {analysis.biasBreakdown?.[0]?.biasScore || 0}%
                   </div>
                 </div>
-                <div className="metric-card">
-                  <h4>Disparate Impact Ratio</h4>
-                  <p className="formula">minority_rate ÷ majority_rate</p>
-                  <div className="metric-value">
-                    {analysis.biasBreakdown && analysis.biasBreakdown.length > 0
-                      ? `${(analysis.biasBreakdown[0]?.disparateImpactRatio || 0).toFixed(2)}`
-                      : 'N/A'
-                    }
-                    <span className="legal-note">(&lt; 0.8 = illegal discrimination)</span>
+
+                <div style={{ background: '#0F172A', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <h4 style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '8px' }}>Disparate Impact Ratio</h4>
+                  <p style={{ color: '#6366f1', fontSize: '11px', marginBottom: '8px' }}>minority_rate ÷ majority_rate</p>
+                  <div style={{ color: 'white', fontSize: '24px', fontWeight: 'bold' }}>
+                    {analysis.biasBreakdown?.[0]?.disparityRatio || '0.00'}
+                  </div>
+                  <p style={{ color: '#ef4444', fontSize: '11px' }}>&lt; 0.8 = illegal discrimination</p>
+                </div>
+
+                <div style={{ background: '#0F172A', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <h4 style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '8px' }}>Statistical Confidence</h4>
+                  <div style={{ color: '#10b981', fontSize: '20px', fontWeight: 'bold' }}>
+                    {analysis.rowCount >= 30 ? 'High' : analysis.rowCount >= 15 ? 'Medium' : 'Low'}
+                  </div>
+                  <p style={{ color: '#64748b', fontSize: '11px' }}>{analysis.rowCount} records analyzed</p>
+                </div>
+
+                <div style={{ background: '#0F172A', borderRadius: '12px', padding: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <h4 style={{ color: '#94a3b8', fontSize: '12px', marginBottom: '8px' }}>Legal Risk Indicator</h4>
+                  <div style={{ color: '#f59e0b', fontSize: '13px' }}>
+                    {domain === 'hiring' && <div>⚖️ Title VII, Equal Pay Act</div>}
+                    {domain === 'loan' && <div>⚖️ Equal Credit Opportunity Act</div>}
+                    {domain === 'medical' && <div>⚖️ ADA, Section 1557</div>}
+                    <div style={{ color: '#64748b', fontSize: '11px', marginTop: '4px' }}>Fair Housing Act</div>
                   </div>
                 </div>
-                <div className="metric-card">
-                  <h4>Statistical Bias Confidence</h4>
-                  <div className="metric-value">
-                    {analysis.biasBreakdown && analysis.biasBreakdown.length > 0
-                      ? analysis.biasBreakdown[0]?.statisticalSignificance || 'Medium'
-                      : 'N/A'
-                    }
-                  </div>
-                </div>
-                <div className="metric-card">
-                  <h4>Legal Risk Indicator</h4>
-                  <div className="legal-risks">
-                    {domain === 'hiring' && <div>• Title VII, Equal Pay Act</div>}
-                    {domain === 'lending' && <div>• Equal Credit Opportunity Act</div>}
-                    {domain === 'healthcare' && <div>• ADA, Section 1557</div>}
-                    <div>• General: Fair Housing Act</div>
-                  </div>
-                </div>
+
               </div>
             </div>
 
-            {/* Detected Bias Types Section */}
+            {/* Detected Bias Types */}
             {analysis.biasBreakdown && analysis.biasBreakdown.length > 0 && (
-              <div className="detected-bias-types">
-                <h3>Detected Bias Types</h3>
-                <div className="bias-types-grid">
+              <div style={{
+                marginTop: '24px',
+                background: '#1E293B',
+                borderRadius: '16px',
+                border: '1px solid rgba(255,255,255,0.1)',
+                padding: '24px'
+              }}>
+                <h3 style={{ color: 'white', fontSize: '18px', fontWeight: '700', marginBottom: '16px' }}>
+                  🔍 Detected Bias Types
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
                   {analysis.biasBreakdown.map((bias, index) => (
-                    <div key={index} className="bias-type-card">
-                      <div className="bias-type-header">
-                        <h4>{bias.biasType || 'General Bias'}</h4>
-                        <span
-                          className={`bias-severity-badge ${getBiasSeverityBadge(bias.biasScore).toLowerCase()}`}
-                          style={{
-                            backgroundColor: getBiasSeverityColor(bias.biasScore),
-                            animation: bias.biasScore > 60 ? 'pulse 2s infinite' : 'none'
-                          }}
-                        >
+                    <div key={index} style={{
+                      background: '#0F172A',
+                      borderRadius: '12px',
+                      padding: '16px',
+                      border: `1px solid ${getBiasSeverityColor(bias.biasScore)}40`
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                        <h4 style={{ color: 'white', fontWeight: '600', textTransform: 'capitalize' }}>
+                          {bias.attribute} Bias
+                        </h4>
+                        <span style={{
+                          background: getBiasSeverityColor(bias.biasScore),
+                          color: 'white',
+                          padding: '2px 10px',
+                          borderRadius: '999px',
+                          fontSize: '11px',
+                          fontWeight: '700',
+                          animation: bias.biasScore > 60 ? 'pulse 2s infinite' : 'none'
+                        }}>
                           {getBiasSeverityBadge(bias.biasScore)}
                         </span>
                       </div>
-                      <div className="bias-score">
-                        <span className="score-number">{bias.biasScore}%</span>
-                        <span className="score-label">Bias Score</span>
+
+                      {/* Bias Score Bar */}
+                      <div style={{ marginBottom: '12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                          <span style={{ color: '#94a3b8', fontSize: '12px' }}>Bias Score</span>
+                          <span style={{ color: 'white', fontWeight: 'bold' }}>{bias.biasScore}%</span>
+                        </div>
+                        <div style={{ background: '#1E293B', borderRadius: '999px', height: '8px' }}>
+                          <div style={{
+                            width: `${bias.biasScore}%`,
+                            height: '8px',
+                            borderRadius: '999px',
+                            background: getBiasSeverityColor(bias.biasScore),
+                            transition: 'width 1s ease'
+                          }} />
+                        </div>
                       </div>
-                      <div className="affected-groups">
-                        <p>
-                          {bias.minorityGroup?.name} disadvantaged
-                        </p>
-                      </div>
-                      <div className="bias-formula">
-                        <small>
-                          {bias.dominantGroup?.name} rate: {bias.dominantGroup?.rate}% vs
-                          {bias.minorityGroup?.name} rate: {bias.minorityGroup?.rate}%
-                        </small>
-                      </div>
+
+                      {/* Group Rates */}
+                      {bias.groups && Object.keys(bias.groups).length > 0 && (
+                        <div style={{ background: '#1E293B', borderRadius: '8px', padding: '10px' }}>
+                          <p style={{ color: '#64748b', fontSize: '11px', marginBottom: '6px' }}>Outcome Rates:</p>
+                          {Object.entries(bias.groups).map(([group, rate]) => (
+                            <div key={group} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                              <span style={{ color: '#94a3b8', fontSize: '12px', textTransform: 'capitalize' }}>{group}</span>
+                              <span style={{ color: rate > 50 ? '#10b981' : '#ef4444', fontSize: '12px', fontWeight: '600' }}>
+                                {typeof rate === 'number' ? `${rate.toFixed(0)}%` : rate}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {bias.explanation && (
+                        <p style={{ color: '#64748b', fontSize: '12px', marginTop: '8px' }}>{bias.explanation}</p>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -201,204 +241,128 @@ export default function Analyze() {
             )}
 
             {/* Impact Simulator */}
-            <div className="impact-simulator">
-              <h3>Impact Simulator</h3>
-              <p>See the difference debiasing makes</p>
-              <div className="comparison-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Metric</th>
-                      <th>Current (Biased)</th>
-                      <th>After Fix (Target)</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>Gender Fairness</td>
-                      <td>{analysis.overallFairnessScore || 0}%</td>
-                      <td>80%+</td>
-                    </tr>
-                    <tr>
-                      <td>Overall Score</td>
-                      <td>{analysis.overallFairnessScore || 0}/100</td>
-                      <td>75/100</td>
-                    </tr>
-                    <tr>
-                      <td>Legal Risk</td>
-                      <td>Critical</td>
-                      <td>Low</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+            <div style={{
+              marginTop: '24px',
+              background: '#1E293B',
+              borderRadius: '16px',
+              border: '1px solid rgba(255,255,255,0.1)',
+              padding: '24px'
+            }}>
+              <h3 style={{ color: 'white', fontSize: '18px', fontWeight: '700', marginBottom: '8px' }}>
+                ⚡ Impact Simulator
+              </h3>
+              <p style={{ color: '#94a3b8', fontSize: '14px', marginBottom: '16px' }}>See the difference debiasing makes</p>
+              
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    <th style={{ color: '#94a3b8', textAlign: 'left', padding: '8px', fontSize: '13px' }}>Metric</th>
+                    <th style={{ color: '#ef4444', textAlign: 'center', padding: '8px', fontSize: '13px' }}>Current (Biased)</th>
+                    <th style={{ color: '#10b981', textAlign: 'center', padding: '8px', fontSize: '13px' }}>After Fix (Target)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <td style={{ color: 'white', padding: '10px 8px', fontSize: '13px' }}>Fairness Score</td>
+                    <td style={{ color: '#ef4444', textAlign: 'center', padding: '10px 8px', fontWeight: 'bold' }}>{analysis.overallFairnessScore}/100</td>
+                    <td style={{ color: '#10b981', textAlign: 'center', padding: '10px 8px', fontWeight: 'bold' }}>75+/100</td>
+                  </tr>
+                  <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <td style={{ color: 'white', padding: '10px 8px', fontSize: '13px' }}>Severity Level</td>
+                    <td style={{ color: '#ef4444', textAlign: 'center', padding: '10px 8px', fontWeight: 'bold' }}>{analysis.severityLevel}</td>
+                    <td style={{ color: '#10b981', textAlign: 'center', padding: '10px 8px', fontWeight: 'bold' }}>Low</td>
+                  </tr>
+                  <tr>
+                    <td style={{ color: 'white', padding: '10px 8px', fontSize: '13px' }}>Legal Risk</td>
+                    <td style={{ color: '#ef4444', textAlign: 'center', padding: '10px 8px', fontWeight: 'bold' }}>Critical</td>
+                    <td style={{ color: '#10b981', textAlign: 'center', padding: '10px 8px', fontWeight: 'bold' }}>Low</td>
+                  </tr>
+                </tbody>
+              </table>
+
               <button
-                className="simulate-fix-button"
-                onClick={handleSimulateFix}
+                onClick={() => setSimulatedImprovement(!simulatedImprovement)}
+                style={{
+                  marginTop: '16px',
+                  background: simulatedImprovement ? '#374151' : 'linear-gradient(90deg, #6366f1, #8b5cf6)',
+                  color: 'white',
+                  border: 'none',
+                  padding: '10px 24px',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '14px'
+                }}
               >
                 {simulatedImprovement ? '🔄 Reset Simulation' : '✨ Apply Fix Simulation'}
               </button>
+
               {simulatedImprovement && (
-                <div className="simulation-results">
-                  <div className="improvement-animation">
-                    <span>Gender Fairness: {analysis.overallFairnessScore || 0}% → 85%</span>
-                    <span>Overall Score: {analysis.overallFairnessScore || 0} → 78</span>
-                    <span>Legal Risk: Critical → Low</span>
-                  </div>
+                <div style={{
+                  marginTop: '16px',
+                  background: '#0F172A',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  border: '1px solid #10b981'
+                }}>
+                  <p style={{ color: '#10b981', fontWeight: '600', marginBottom: '8px' }}>✅ After Debiasing:</p>
+                  <p style={{ color: 'white', fontSize: '13px' }}>📈 Fairness Score: {analysis.overallFairnessScore} → 78/100</p>
+                  <p style={{ color: 'white', fontSize: '13px' }}>✅ Severity: {analysis.severityLevel} → Low</p>
+                  <p style={{ color: 'white', fontSize: '13px' }}>⚖️ Legal Risk: Critical → Low</p>
                 </div>
               )}
             </div>
 
-            {/* ✅ Recommendations Section — Gemini AI Generated */}
+            {/* AI Recommendations — ONLY ONCE */}
             {analysis.recommendations && analysis.recommendations.length > 0 && (
               <div style={{
                 marginTop: '24px',
-                background: '#fff',
-                borderRadius: '12px',
-                border: '1px solid #e5e7eb',
+                background: '#1E293B',
+                borderRadius: '16px',
+                border: '1px solid rgba(255,255,255,0.1)',
                 padding: '24px'
               }}>
-                <h3 style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  color: '#1f2937',
-                  marginBottom: '16px'
-                }}>
+                <h3 style={{ color: 'white', fontSize: '18px', fontWeight: '700', marginBottom: '16px' }}>
                   ✅ AI-Powered Recommendations
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {analysis.recommendations.map((rec, i) => (
                     <div key={i} style={{
-                      background: '#f9fafb',
+                      background: '#0F172A',
                       borderRadius: '10px',
                       padding: '16px',
-                      border: '1px solid #f3f4f6'
+                      border: '1px solid rgba(255,255,255,0.05)'
                     }}>
                       <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
                         <div style={{
-                          width: '28px',
-                          height: '28px',
+                          width: '28px', height: '28px',
                           borderRadius: '50%',
-                          background: '#e0e7ff',
-                          color: '#4f46e5',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontWeight: 'bold',
-                          fontSize: '13px',
-                          flexShrink: 0
+                          background: '#312e81',
+                          color: '#818cf8',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontWeight: 'bold', fontSize: '13px', flexShrink: 0
                         }}>
                           {i + 1}
                         </div>
                         <div style={{ flex: 1 }}>
-                          <h4 style={{
-                            fontWeight: '600',
-                            color: '#1f2937',
-                            fontSize: '14px',
-                            marginBottom: '8px'
-                          }}>
+                          <h4 style={{ color: 'white', fontWeight: '600', fontSize: '14px', marginBottom: '8px' }}>
                             {rec.title}
                           </h4>
                           {rec.problem && (
-                            <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
-                              <span style={{ color: '#ef4444', fontWeight: '500' }}>
-                                Problem:{' '}
-                              </span>
+                            <p style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>
+                              <span style={{ color: '#ef4444', fontWeight: '500' }}>Problem: </span>
                               {rec.problem}
                             </p>
                           )}
                           {rec.action && (
-                            <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
-                              <span style={{ color: '#10b981', fontWeight: '500' }}>
-                                Action:{' '}
-                              </span>
+                            <p style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '4px' }}>
+                              <span style={{ color: '#10b981', fontWeight: '500' }}>Action: </span>
                               {rec.action}
                             </p>
                           )}
                           {rec.expectedImprovement && (
-                            <p style={{ fontSize: '12px', color: '#6b7280' }}>
-                              <span style={{ color: '#6366f1', fontWeight: '500' }}>
-                                Expected Improvement:{' '}
-                              </span>
-                              {rec.expectedImprovement}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-              <div style={{
-                marginTop: '24px',
-                background: '#fff',
-                borderRadius: '12px',
-                border: '1px solid #e5e7eb',
-                padding: '24px'
-              }}>
-                <h3 style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  color: '#1f2937',
-                  marginBottom: '16px'
-                }}>
-                  ✅ AI-Powered Recommendations
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {analysis.recommendations.map((rec, i) => (
-                    <div key={i} style={{
-                      background: '#f9fafb',
-                      borderRadius: '10px',
-                      padding: '16px',
-                      border: '1px solid #f3f4f6'
-                    }}>
-                      <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                        <div style={{
-                          width: '28px',
-                          height: '28px',
-                          borderRadius: '50%',
-                          background: '#e0e7ff',
-                          color: '#4f46e5',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontWeight: 'bold',
-                          fontSize: '13px',
-                          flexShrink: 0
-                        }}>
-                          {i + 1}
-                        </div>
-                        <div style={{ flex: 1 }}>
-                          <h4 style={{
-                            fontWeight: '600',
-                            color: '#1f2937',
-                            fontSize: '14px',
-                            marginBottom: '8px'
-                          }}>
-                            {rec.title}
-                          </h4>
-                          {rec.problem && (
-                            <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
-                              <span style={{ color: '#ef4444', fontWeight: '500' }}>
-                                Problem:{' '}
-                              </span>
-                              {rec.problem}
-                            </p>
-                          )}
-                          {rec.action && (
-                            <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
-                              <span style={{ color: '#10b981', fontWeight: '500' }}>
-                                Action:{' '}
-                              </span>
-                              {rec.action}
-                            </p>
-                          )}
-                          {rec.expectedImprovement && (
-                            <p style={{ fontSize: '12px', color: '#6b7280' }}>
-                              <span style={{ color: '#6366f1', fontWeight: '500' }}>
-                                Expected Improvement:{' '}
-                              </span>
+                            <p style={{ fontSize: '12px', color: '#94a3b8' }}>
+                              <span style={{ color: '#6366f1', fontWeight: '500' }}>Expected Improvement: </span>
                               {rec.expectedImprovement}
                             </p>
                           )}
@@ -410,83 +374,53 @@ export default function Analyze() {
               </div>
             )}
 
-            {/* ✅ Top Discriminatory Patterns */}
-            {analysis.topDiscriminatoryPatterns && 
-             analysis.topDiscriminatoryPatterns.length > 0 && (
+            {/* Top Discriminatory Patterns */}
+            {analysis.topDiscriminatoryPatterns?.length > 0 && (
               <div style={{
                 marginTop: '16px',
-                background: '#fff',
-                borderRadius: '12px',
-                border: '1px solid #fee2e2',
+                background: '#1E293B',
+                borderRadius: '16px',
+                border: '1px solid #ef444440',
                 padding: '24px'
               }}>
-                <h3 style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  color: '#1f2937',
-                  marginBottom: '16px'
-                }}>
+                <h3 style={{ color: 'white', fontSize: '18px', fontWeight: '700', marginBottom: '16px' }}>
                   🚨 Top Discriminatory Patterns
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {analysis.topDiscriminatoryPatterns.map((pattern, i) => (
                     <div key={i} style={{
-                      display: 'flex',
-                      gap: '10px',
-                      padding: '12px',
-                      background: '#fef2f2',
-                      borderRadius: '8px',
-                      border: '1px solid #fecaca'
+                      display: 'flex', gap: '10px', padding: '12px',
+                      background: '#0F172A', borderRadius: '8px',
+                      border: '1px solid #ef444430'
                     }}>
-                      <span style={{ 
-                        color: '#ef4444', 
-                        fontWeight: 'bold', 
-                        fontSize: '13px' 
-                      }}>
-                        {i + 1}.
-                      </span>
-                      <p style={{ 
-                        color: '#374151', 
-                        fontSize: '13px', 
-                        margin: 0 
-                      }}>
-                        {pattern}
-                      </p>
+                      <span style={{ color: '#ef4444', fontWeight: 'bold', fontSize: '13px' }}>{i + 1}.</span>
+                      <p style={{ color: '#e2e8f0', fontSize: '13px', margin: 0 }}>{pattern}</p>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {/* ✅ Legal Risk + Summary */}
+            {/* Legal Risk Summary */}
             {(analysis.legalRisk || analysis.summary) && (
               <div style={{
                 marginTop: '16px',
-                background: '#fffbeb',
-                borderRadius: '12px',
-                border: '1px solid #fde68a',
-                padding: '24px'
+                background: '#1E293B',
+                borderRadius: '16px',
+                border: '1px solid #f59e0b40',
+                padding: '24px',
+                marginBottom: '32px'
               }}>
-                <h3 style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  color: '#1f2937',
-                  marginBottom: '12px'
-                }}>
+                <h3 style={{ color: 'white', fontSize: '18px', fontWeight: '700', marginBottom: '12px' }}>
                   ⚖️ Legal Risk & Summary
                 </h3>
                 {analysis.summary && (
-                  <p style={{ 
-                    color: '#374151', 
-                    fontSize: '14px', 
-                    marginBottom: '12px',
-                    lineHeight: '1.6'
-                  }}>
+                  <p style={{ color: '#cbd5e1', fontSize: '14px', marginBottom: '12px', lineHeight: '1.6' }}>
                     {analysis.summary}
                   </p>
                 )}
                 {analysis.legalRisk && (
-                  <p style={{ fontSize: '13px', color: '#92400e' }}>
+                  <p style={{ fontSize: '13px', color: '#fbbf24' }}>
                     <span style={{ fontWeight: '600' }}>Legal Risk: </span>
                     {analysis.legalRisk}
                   </p>
